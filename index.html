@@ -631,6 +631,17 @@
                 setTimeout(renderLevel, 1000);
             }
         }
+                /* --- FORCE AUDIO STOP ON EXIT --- */
+        document.addEventListener('visibilitychange', function() {
+            const music = document.getElementById('bgMusic');
+            if (document.hidden) {
+                music.pause(); // Stop playing when user leaves
+            } else {
+                // Optional: Resume when they come back. 
+                // Remove the line below if you want them to restart manually.
+                music.play().catch(e => console.log("Resume failed"));
+            }
+        });
     </script>
 </body>
 </html>
