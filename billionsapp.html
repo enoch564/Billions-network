@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Billions Network | The Trust Protocol</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Orbitron:wght@400;600;700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        /* --- CORE VARIABLES --- */
+        :root {
+            --c-blue: #2962FF;
+            --c-cyan: #00E5FF;
+            --c-purple: #7C4DFF;
+            --c-dark: #030308;
+            --c-text-main: #FFFFFF;
+            --c-text-muted: #94A3B8;
+            --c-danger: #ff3366;
+            --c-success: #00ff88;
+            --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--c-dark);
+            color: var(--c-text-main);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
+        .font-mono { font-family: 'Share Tech Mono', monospace; }
+        .font-cyber { font-family: 'Orbitron', sans-serif; }
+
+        /* --- BACKGROUND --- */
+        .bg-cinema {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
+            background: radial-gradient(circle at 15% 50%, rgba(41, 98, 255, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 85% 30%, rgba(124, 77, 255, 0.08) 0%, transparent 50%);
+        }
+        
+        .grid-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.08) 2px, transparent 2px),
+                              linear-gradient(90deg, rgba(255, 255, 255, 0.08) 2px, transparent 2px);
+            background-size: 50px 50px;
+            mask-image: radial-gradient(circle at center, black 50%, transparent 100%);
+            -webkit-mask-image: radial-gradient(circle at center, black 50%, transparent 100%);
+            z-index: -1; opacity: 0.6;
+            transform: perspective(1000px) rotateX(10deg) scale(1.1);
+            animation: gridScroll 20s linear infinite;
+        }
+
+        @keyframes gridScroll { 0% { background-position: 0 0; } 100% { background-position: 0 -500px; } }
+
+        /* --- GLITCH TRANSITION --- */
+        .glitch-active { animation: glitch-anim 0.3s infinite; filter: contrast(120%) brightness(120%); }
+        @keyframes glitch-anim {
+            0% { transform: translate(0); clip-path: inset(0 0 0 0); }
+            20% { transform: translate(-2px, 2px); clip-path: inset(10% 0 40% 0); }
+            40% { transform: translate(2px, -2px); clip-path: inset(40% 0 10% 0); }
+            60% { transform: translate(-2px, -2px); clip-path: inset(80% 0 5% 0); }
+            100% { transform: translate(0); clip-path: inset(0 0 0 0); }
+        }
+
+        /* --- LAYOUT UTILITIES --- */
+        .container {
+            max-width: 1200px; margin: 0 auto; padding: 0 24px;
+            position: relative; z-index: 2; min-height: 100vh;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+
+        .stage {
+            position: absolute; top: 0; left: 0; width: 100%; min-height: 100vh;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.5s var(--ease-out), transform 0.5s var(--ease-out);
+            transform: scale(1.05);
+            padding: 40px 20px;
+        }
+        .stage.active { opacity: 1; pointer-events: all; transform: scale(1); position: relative; }
+        .stage.hidden { display: none; }
+
+        /* --- TYPOGRAPHY --- */
+        .hero-title {
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 800; line-height: 1.1; text-align: center; text-transform: uppercase;
+            background: linear-gradient(180deg, #FFFFFF 0%, rgba(255,255,255,0.7) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 24px; letter-spacing: -0.02em;
+        }
+        .hero-subtitle {
+            font-family: 'Share Tech Mono', monospace; color: var(--c-cyan);
+            text-transform: uppercase; letter-spacing: 4px; margin-bottom: 30px;
+            font-size: 0.9rem; position: relative; display: inline-block;
+        }
+
+        /* --- COMPONENTS --- */
+        .brand-logo {
+            width: 120px; height: 120px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.1); padding: 5px; margin-bottom: 40px;
+            box-shadow: 0 0 50px rgba(41, 98, 255, 0.2);
+            animation: pulseLogo 4s infinite ease-in-out; object-fit: cover;
+        }
+
+        .btn-cyber {
+            position: relative; background: transparent; color: var(--c-cyan);
+            border: 1px solid rgba(0, 229, 255, 0.4); padding: 18px 50px;
+            font-family: 'Orbitron', sans-serif; font-size: 0.9rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 2px; cursor: pointer;
+            overflow: hidden; transition: all 0.3s;
+            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+        }
+        .btn-cyber:hover {
+            background: rgba(0, 229, 255, 0.1); box-shadow: 0 0 30px rgba(0, 229, 255, 0.25);
+            transform: translateY(-2px); border-color: var(--c-cyan);
+        }
+        .btn-attention { animation: btnGlowPulse 2s infinite ease-in-out; }
+        @keyframes btnGlowPulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(0, 229, 255, 0.2); border-color: rgba(0, 229, 255, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(0, 229, 255, 0.8); border-color: rgba(0, 229, 255, 1); background: rgba(0, 229, 255, 0.1); }
+        }
+
+        .social-bar { display: flex; gap: 30px; margin-top: 50px; justify-content: center; width: 100%; }
+        .social-link {
+            color: var(--c-text-muted); text-decoration: none; font-size: 1.1rem;
+            transition: all 0.3s; display: flex; align-items: center; gap: 10px;
+            font-family: 'Share Tech Mono'; padding: 10px 20px;
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 30px; background: rgba(0,0,0,0.3);
+        }
+        .social-link:hover { color: var(--c-cyan); border-color: var(--c-cyan); background: rgba(0, 229, 255, 0.1); }
+
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px; width: 100%; max-width: 900px; margin: 30px 0;
+        }
+        .stat-box {
+            background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+            border: 1px solid rgba(255,255,255,0.08); padding: 30px; text-align: center;
+            transition: all 0.3s; position: relative; z-index: 2;
+        }
+
+        /* --- CHAOTIC RANDOM BOUNCING ENGINE --- */
+        .bg-chaos-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; pointer-events: none; z-index: 0;
+        }
+        .bouncer {
+            position: absolute; border-radius: 50%; object-fit: cover; opacity: 0.2;
+            animation-name: bounceX, bounceY;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+            animation-direction: alternate;
+        }
+        @keyframes bounceX { 0% { left: 0; } 100% { left: calc(100% - 80px); } }
+        @keyframes bounceY { 0% { top: 0; } 100% { top: calc(100% - 80px); } }
+
+        /* --- VISIBLE FALLING TEXT --- */
+        .bg-rain-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; pointer-events: none; z-index: 0;
+        }
+        .falling-text {
+            position: absolute; font-family: 'Orbitron'; font-weight: 900; 
+            color: rgba(41, 98, 255, 0.5); 
+            opacity: 0; animation: fallDown linear infinite; user-select: none;
+        }
+        @keyframes fallDown {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(110vh) rotate(20deg); opacity: 0; }
+        }
+
+        /* --- NFT CARD IMAGES --- */
+        .bounce-img {
+            display: block; margin: 0 auto 15px auto; border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: float 3s ease-in-out infinite;
+            border: 1px solid rgba(255,255,255,0.2); object-fit: cover;
+        }
+        .bounce-img.glow { border-color: var(--c-cyan); box-shadow: 0 0 20px rgba(0, 229, 255, 0.3); }
+        .bounce-img.gold { border-color: #FFD700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        /* --- NFC & PHONE --- */
+        .nfc-stage {
+            width: 100%; height: 350px; position: relative; margin: 30px 0; user-select: none;
+            background: radial-gradient(circle at center, rgba(41,98,255,0.1) 0%, transparent 70%);
+        }
+        .passport-obj {
+            position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+            width: 200px; height: 130px; background: linear-gradient(135deg, #064e3b, #022c22);
+            border: 2px solid #10b981; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1;
+        }
+        .passport-text {
+            font-family: 'Orbitron'; font-weight: 700; color: #d1fae5; letter-spacing: 2px; font-size: 1rem; text-align: center;
+        }
+        .phone-obj {
+            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            width: 110px; height: 190px; background: #000; border: 3px solid #333;
+            border-radius: 16px; cursor: grab; z-index: 10;
+        }
+        .phone-screen-simple {
+            width: 100%; height: 100%; background: #050505; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; overflow: hidden; flex-direction: column;
+        }
+        .verified-text {
+            font-family: 'Orbitron'; font-weight: 700; color: var(--c-success);
+            font-size: 0.8rem; text-align: center; white-space: nowrap; width: 100%;
+            margin-top: 5px; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+
+        /* --- DO YOU KNOW LAYOUT --- */
+        .dyk-grid {
+            display: grid; grid-template-columns: 1fr; gap: 20px; width: 100%; max-width: 900px;
+            margin-top: 30px; z-index: 2;
+        }
+        .dyk-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .dyk-label { font-family: 'Share Tech Mono'; color: var(--c-text-muted); }
+        .dyk-val { font-family: 'Orbitron'; color: var(--c-cyan); font-size: 1.2rem; }
+
+        @media (min-width: 768px) {
+            .dyk-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
+            .dyk-row { border-bottom: 1px solid rgba(255,255,255,0.1); }
+        }
+
+        /* --- DARVOS WIN PAGE --- */
+        .reward-title {
+            font-size: 3.5rem; margin-bottom: 20px;
+            background: linear-gradient(to right, #00ff88, #00d4ff);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+        }
+        .darvos-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+            border: 1px solid rgba(0, 229, 255, 0.2); border-radius: 20px; padding: 30px;
+            display: inline-block; margin-top: 30px; box-shadow: 0 0 30px rgba(0, 229, 255, 0.1);
+        }
+        .darvos-img-glow {
+            width: 70px; height: 70px; border-radius: 50%; border: 2px solid var(--c-cyan);
+            box-shadow: 0 0 15px var(--c-cyan), inset 0 0 10px var(--c-cyan);
+            object-fit: cover; margin-bottom: 10px;
+        }
+        .darvos-link {
+            color: var(--c-cyan); text-decoration: none; font-family: 'Orbitron'; letter-spacing: 1px;
+            font-size: 1.1rem; display: block; margin-top: 5px; font-weight: 700;
+        }
+
+        @keyframes pulseLogo { 0%, 100% { box-shadow: 0 0 40px rgba(41, 98, 255, 0.3); } 50% { box-shadow: 0 0 80px rgba(0, 229, 255, 0.6); } }
+        
+        @media (min-width: 1024px) {
+            .hero-title { font-size: 6.5rem; letter-spacing: 0.05em; }
+            .brand-logo { width: 160px; height: 160px; margin-bottom: 50px; }
+            .container { justify-content: center; }
+        }
+        @media (max-width: 768px) {
+            .hero-title { font-size: 3rem; margin-top: 20px; } 
+            .phone-obj { width: 90px; height: 160px; }
+            .passport-obj { width: 150px; height: 100px; }
+        }
+        /* --- REPLAY BUTTON --- */
+.btn-replay {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--c-text-muted);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    padding: 12px 30px;
+    border-radius: 50px;
+    cursor: pointer;
+    margin-top: 40px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0.7;
+}
+
+.btn-replay:hover {
+    border-color: var(--c-cyan);
+    color: var(--c-cyan);
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.15);
+    opacity: 1;
+    transform: translateY(-2px);
+}
+    </style>
+</head>
+<body>
+    <audio id="bgMusic" src="music.mp3" loop></audio>
+    <audio id="scanSound" src="data:audio/wav;base64,UklGRl9vT1BXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"></audio>
+    <div class="bg-cinema"></div>
+    <div class="grid-overlay"></div>
+    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 3px; background: rgba(255,255,255,0.05); z-index: 50;">
+        <div id="progress" style="width: 0%; height: 100%; background: var(--c-cyan); box-shadow: 0 0 10px var(--c-cyan); transition: width 0.5s;"></div>
+    </div>
+
+    <div class="container">
+        
+        <section class="stage active" id="stage0">
+            <div style="text-align: center;"><img src="https://pbs.twimg.com/profile_images/2005111866696040448/997IyU1L.jpg" alt="Logo" class="brand-logo"></div>
+            <div class="hero-subtitle">SYSTEM INITIALIZED // PROTOCOL V1.0</div>
+            <h1 class="hero-title">BILLIONS<br>NETWORK</h1>
+            <p style="color: var(--c-text-muted); text-align: center; max-width: 600px; margin: 0 auto 50px auto; line-height: 1.8; font-size: 1.15rem;">
+                The boundary between Human and AI has dissolved. <br>
+                <span style="color: var(--c-cyan); font-weight: 600;">Verify your humanity</span> to enter the new internet.
+            </p>
+            <button class="btn-cyber btn-attention" onclick="nextStage(0)">Initialize Sequence</button>
+            <div class="social-bar">
+                <a href="https://x.com/billions_ntwk" target="_blank" class="social-link"><span>𝕏</span> Billions_ntwk</a>
+                <a href="https://discord.gg/billions-ntwk" target="_blank" class="social-link"><span>💬</span> Discord</a>
+            </div>
+        </section>
+
+        <section class="stage hidden" id="stage1">
+            <h2 class="hero-title" style="font-size: 2.5rem; color: var(--c-danger);">CRITICAL ERROR</h2>
+            <p class="font-mono" style="color: var(--c-danger); margin-bottom: 30px;">// DETECTED: BOT SWARM</p>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span style="font-family: 'Orbitron'; font-size: 3rem; color: var(--c-danger); display: block;">47%</span>
+                    <span class="font-mono" style="color: var(--c-text-muted); font-size: 0.8rem;">GLOBAL TRAFFIC IS BOTS</span>
+                </div>
+                <div class="stat-box">
+                    <span style="font-family: 'Orbitron'; font-size: 3rem; color: #fff; display: block;">∞</span>
+                    <span class="font-mono" style="color: var(--c-text-muted); font-size: 0.8rem;">FAKE IDENTITIES</span>
+                </div>
+            </div>
+            <button class="btn-cyber" onclick="nextStage(1)">Deploy Solution</button>
+        </section>
+
+        <section class="stage hidden" id="stage2">
+            <h2 class="hero-title" style="font-size: 3rem;">TRUST<br>PROTOCOL</h2>
+            <p style="text-align: center; max-width: 600px; color: var(--c-text-muted); margin-bottom: 40px;">Prove you are human without revealing your data.</p>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span id="count-humans" style="font-family: 'Orbitron'; font-size: 2.5rem; color: var(--c-cyan); display: block;">0</span>
+                    <span class="font-mono" style="font-size: 0.8rem; color: var(--c-text-muted);">VERIFIED HUMANS</span>
+                </div>
+                <div class="stat-box">
+                    <span id="count-value" style="font-family: 'Orbitron'; font-size: 2.5rem; color: #fff; display: block;">$0</span>
+                    <span class="font-mono" style="font-size: 0.8rem; color: var(--c-text-muted);">CAPITAL FUNDING</span>
+                </div>
+            </div>
+            <button class="btn-cyber" onclick="nextStage(2)">Test Technology</button>
+        </section>
+
+        <section class="stage hidden" id="stage3">
+            <h2 class="font-cyber" style="font-size: 2rem; text-align: center; margin-bottom: 10px;">ZK VERIFICATION</h2>
+            <p class="font-mono" id="nfc-instructions" style="color: var(--c-text-muted); text-align: center;">> DRAG PHONE TO PASSPORT</p>
+            <div class="nfc-stage" id="nfc-area">
+                <div class="passport-obj">
+                    <div style="width: 40px; height: 30px; border: 1px solid #FFD700; border-radius: 4px; margin-bottom: 10px; opacity: 0.6;"></div>
+                    <div class="passport-text">PASSPORT<br>NFC</div>
+                </div>
+                <div class="phone-obj" id="phone-drag">
+                    <div class="phone-screen-simple">
+                        <div id="scan-line" style="position: absolute; width: 100%; height: 2px; background: var(--c-success); top: 0; box-shadow: 0 0 10px var(--c-success); opacity: 0;"></div>
+                        <span id="phone-icon" style="font-size: 3rem;">📱</span>
+                    </div>
+                </div>
+            </div>
+            <button class="btn-cyber" id="btn-verified" onclick="nextStage(3)" style="opacity: 0.3; pointer-events: none; filter: grayscale(1);">Identity Confirmed</button>
+        </section>
+
+        <section class="stage hidden" id="stage4">
+            <div class="bg-chaos-container">
+                <img src="genesis.jpg" class="bouncer" style="width:60px; height:60px; top:5%; left:10%; animation-duration: 8s, 13s;">
+                <img src="supermask.jpg" class="bouncer" style="width:80px; height:80px; top:80%; left:20%; animation-duration: 15s, 9s;">
+                <img src="genesis.jpg" class="bouncer" style="width:50px; height:50px; top:20%; left:85%; animation-duration: 11s, 17s;">
+                <img src="supermask.jpg" class="bouncer" style="width:70px; height:70px; top:50%; left:50%; animation-duration: 19s, 12s;">
+                <img src="genesis.jpg" class="bouncer" style="width:90px; height:90px; top:90%; left:70%; animation-duration: 14s, 21s;">
+                <img src="supermask.jpg" class="bouncer" style="width:60px; height:60px; top:10%; left:60%; animation-duration: 10s, 16s;">
+            </div>
+
+            <h2 class="hero-title" style="font-size: clamp(2.5rem, 5vw, 4rem); margin-bottom: 20px; z-index:2;">ONCHAIN<br>ASSETS</h2>
+            <div class="stats-grid" style="z-index:2;">
+                <div class="stat-box" style="text-align: center;">
+                    <img src="genesis.jpg" alt="Genesis" class="bounce-img gold" style="width: 80px; height: 80px;">
+                    <span class="font-mono" style="color: #FFD700; border: 1px solid #FFD700; padding: 2px 8px; font-size: 0.7rem;">OG GENESIS</span>
+                    <h3 style="font-size: 1.4rem; margin: 15px 0 5px 0;">The Very First</h3>
+                    <p style="color: var(--c-text-muted); font-size: 0.85rem;">Launched June 2025.<br>Deflationary supply.</p>
+                </div>
+                <div class="stat-box" style="text-align: center;">
+                    <img src="supermask.jpg" alt="Supermask" class="bounce-img glow" style="width: 100px; height: 100px;">
+                    <span class="font-mono" style="color: var(--c-cyan); border: 1px solid var(--c-cyan); padding: 2px 8px; font-size: 0.7rem;">SUPERMASKS</span>
+                    <h3 style="font-size: 1.4rem; margin: 15px 0 5px 0;">PFP Lead</h3>
+                    <p style="color: var(--c-text-muted); font-size: 0.85rem;">5,757 Identities.<br>Bot-proof presence.</p>
+                </div>
+            </div>
+            <button class="btn-cyber" style="z-index:2;" onclick="nextStage(4)">View Token</button>
+        </section>
+                <section class="stage hidden" id="stage5">
+            <div class="bg-rain-container" id="rain-container"></div>
+            <h2 class="hero-title" style="color: var(--c-blue); text-shadow: 0 0 30px rgba(41,98,255,0.5); z-index:2;">$BILL</h2>
+            <p class="font-mono" style="color: var(--c-text-muted); margin-bottom: 30px; z-index:2;">FUELING THE TRUST ECONOMY</p>
+            <div class="stat-box" style="max-width: 800px; width: 100%; z-index:2;">
+                <div class="stats-grid" style="margin: 0; grid-template-columns: repeat(3, 1fr);">
+                    <div><span style="color: var(--c-blue); font-size: 2rem; font-family: 'Orbitron'; display: block;">10B</span><span class="font-mono" style="font-size: 0.7rem;">FIXED SUPPLY</span></div>
+                    <div><span style="font-size: 2rem; display: block;">🔥</span><span class="font-mono" style="font-size: 0.7rem;">DEFLATIONARY</span></div>
+                    <div><span style="font-size: 2rem; display: block;">AI</span><span class="font-mono" style="font-size: 0.7rem;">AGENT FEES</span></div>
+                </div>
+            </div>
+            <button class="btn-cyber" style="margin-top: 40px; z-index:2;" onclick="nextStage(5)">Next</button>
+        </section>
+
+        <section class="stage hidden" id="stage6">
+            <div class="bg-chaos-container">
+                <img src="https://pbs.twimg.com/profile_images/2005111866696040448/997IyU1L.jpg" class="bouncer" style="width:80px; height:80px; top:10%; left:10%; animation-duration: 9s, 14s;">
+                <img src="https://pbs.twimg.com/profile_images/2005111866696040448/997IyU1L.jpg" class="bouncer" style="width:120px; height:120px; top:60%; left:80%; animation-duration: 17s, 11s;">
+                <img src="https://pbs.twimg.com/profile_images/2005111866696040448/997IyU1L.jpg" class="bouncer" style="width:60px; height:60px; top:85%; left:30%; animation-duration: 13s, 8s;">
+                <img src="https://pbs.twimg.com/profile_images/2005111866696040448/997IyU1L.jpg" class="bouncer" style="width:100px; height:100px; top:20%; left:70%; animation-duration: 15s, 19s;">
+            </div>
+
+            <h2 class="hero-title" style="font-size: 3.5rem; margin-bottom: 5px; z-index:2;">DO YOU KNOW</h2>
+            <div class="hero-subtitle" style="color: #fff; z-index:2;">BILLIONS EDITION</div>
+
+            <div class="stat-box" style="width:100%; max-width:900px; text-align:left; z-index:2; padding: 20px;">
+                <div class="dyk-grid">
+                    <div class="dyk-row"><span class="dyk-label">PARTNERS</span><span class="dyk-val" style="color:var(--c-success);">900+</span></div>
+                    <div class="dyk-row"><span class="dyk-label">VERIFIED USERS</span><span class="dyk-val" style="color:var(--c-cyan);">2.3M+</span></div>
+                    <div class="dyk-row"><span class="dyk-label">TOTAL FUNDING</span><span class="dyk-val" style="color:#fff;">$35M+</span></div>
+                    <div class="dyk-row"><span class="dyk-label">PROJECTS</span><span class="dyk-val" style="color:var(--c-purple);">9,000+</span></div>
+                    <div class="dyk-row"><span class="dyk-label">APP DOWNLOADS</span><span class="dyk-val">300K+</span></div>
+                    <div class="dyk-row"><span class="dyk-label">COMMUNITY</span><span class="dyk-val">695K+</span></div>
+                </div>
+                <div style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:20px;">
+                    <p style="color:var(--c-text-muted); margin-bottom:10px;">> First universal Human & AI verification network.</p>
+                    <p style="color:var(--c-text-muted); margin-bottom:10px;">> Created by founders of Disco.xyz, Hermez, and Polygon.</p>
+                    <p style="color:var(--c-text-muted); margin-bottom:10px;">> Multichain expansion is accelerating.</p>
+                </div>
+            </div>
+            <button class="btn-cyber" style="margin-top: 30px; z-index:2;" onclick="nextStage(6)">Enter Final Verification</button>
+        </section>
+
+        <section class="stage hidden" id="stage7">
+            <div id="game-intro" style="text-align: center;">
+                <h2 class="hero-title" style="font-size: 3rem;">FINAL<br>VERIFICATION</h2>
+                <div style="width: 100px; height: 1px; background: var(--c-success); margin: 20px auto;"></div>
+                <p class="font-mono" style="color: var(--c-success); margin-bottom: 20px;">ACCESS LEVEL 5 REQ.</p>
+                <p style="color: var(--c-text-muted); max-width: 400px; margin: 0 auto 40px auto;">Prove you can distinguish Human from AI.</p>
+                <button class="btn-cyber" style="border-color: var(--c-success); color: var(--c-success);" onclick="startGame()">START PROTOCOL</button>
+            </div>
+
+            <div id="game-container" style="display: none; width: 100%; max-width: 800px;">
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 20px;">
+                    <span class="font-mono">LVL <span id="g-level" style="color: var(--c-cyan);">1</span>/5</span>
+                    <span class="font-mono">SCORE <span id="g-score" style="color: var(--c-success);">0</span></span>
+                </div>
+                <div style="text-align: center;">
+                    <h3 id="g-title" class="font-cyber" style="color: var(--c-cyan);">BASIC FILTER</h3>
+                    <p id="g-desc" style="color: var(--c-text-muted); font-size: 0.9rem;">Select Humans.</p>
+                </div>
+                <div id="g-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 10px; margin: 20px 0;"></div>
+                <div style="text-align: center;">
+                    <button id="g-verify-btn" class="btn-cyber" style="font-size: 0.8rem; padding: 15px 30px;">VERIFY</button>
+                    <div id="g-msg" class="font-mono" style="margin-top: 10px; height: 20px; font-size: 0.8rem;"></div>
+                </div>
+            </div>
+
+            <div id="win-page" style="display: none; text-align: center;">
+                <div style="font-size: 4rem; margin-bottom: 20px;">🎉</div>
+                <h2 class="reward-title">ACCESS<br>GRANTED</h2>
+                <div class="darvos-card">                   
+
+                    <p style="font-family: 'Share Tech Mono'; color: var(--c-text-muted); font-size: 0.8rem; margin-bottom: 15px; letter-spacing: 2px;">BROUGHT TO YOU BY</p>
+                    <img src="https://pbs.twimg.com/profile_images/2003843793011810306/vo9aIpJN.jpg" alt="Darvos" class="darvos-img-glow">
+                    <a href="https://x.com/ser_darvos" target="_blank" class="darvos-link">𝕏 @ser_darvos</a>
+                    <button class="btn-replay" onclick="window.location.reload()">
+    <span>⟳</span> Replay Journey
+</button>
+
+                </div>
+            </div>
+        </section>
+    </div>
+   
+
+    <script>
+        const rainContainer = document.getElementById('rain-container');
+        for(let i=0; i<20; i++) {
+            const el = document.createElement('div');
+            el.className = 'falling-text';
+            el.innerText = '$BILL';
+            el.style.left = Math.random() * 100 + '%';
+            el.style.fontSize = (Math.random() * 1.5 + 0.8) + 'rem';
+            el.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            el.style.animationDelay = (Math.random() * 5) + 's';
+            rainContainer.appendChild(el);
+        }
+
+        let currentStage = 0; const totalStages = 8;
+        function nextStage(n) {
+            const current = document.getElementById(`stage${n}`);
+            const next = document.getElementById(`stage${n+1}`);
+            if (n === 0) { const bg = document.getElementById('bgMusic'); bg.volume = 0.5; bg.play().catch(e=>{}); }
+            document.body.classList.add('glitch-active');
+            setTimeout(() => {
+                current.classList.remove('active'); current.classList.add('hidden');
+                next.classList.remove('hidden'); void next.offsetWidth; next.classList.add('active');
+                document.body.classList.remove('glitch-active');
+                document.getElementById('progress').style.width = `${((n+1)/(totalStages-1))*100}%`;
+                if (n+1 === 2) { animateValue('count-humans', 0, 2386000, 2000, 'M+'); animateValue('count-value', 0, 35, 2000, 'M+', '$'); }
+            }, 300);
+        }
+        function animateValue(id, start, end, duration, suffix = '', prefix = '') {
+            let el = document.getElementById(id); let startTime = null;
+            function animation(currentTime) {
+                if (!startTime) startTime = currentTime;
+                let progress = Math.min((currentTime - startTime) / duration, 1);
+                let val = Math.floor((1 - Math.pow(1 - progress, 3)) * (end - start) + start);
+                let displayVal = val;
+                if (end > 1000) displayVal = (val / 1000000).toFixed(1);
+                el.innerText = prefix + displayVal + suffix;
+                if (progress < 1) requestAnimationFrame(animation);
+            }
+            requestAnimationFrame(animation);
+        }
+
+        /* NFC Logic */
+        const phone = document.getElementById('phone-drag'); const scanLine = document.getElementById('scan-line');
+        const phoneIcon = document.getElementById('phone-icon'); let verified = false;
+        ['mousedown', 'touchstart'].forEach(evt => phone.addEventListener(evt, startDrag, {passive:false}));
+        ['mousemove', 'touchmove'].forEach(evt => document.addEventListener(evt, drag, {passive:false}));
+        ['mouseup', 'touchend'].forEach(evt => document.addEventListener(evt, endDrag));
+        let startX, startY, initLeft, initTop, isDragging = false;
+        function startDrag(e) {
+            if(verified) return; isDragging = true;
+            const c = e.touches ? e.touches[0] : e;
+            startX = c.clientX; startY = c.clientY;
+            const rect = phone.getBoundingClientRect(); const area = document.getElementById('nfc-area').getBoundingClientRect();
+            initLeft = rect.left - area.left; initTop = rect.top - area.top; phone.style.transition = 'none';
+        }
+        function drag(e) {
+            if(!isDragging) return; e.preventDefault();
+            const c = e.touches ? e.touches[0] : e;
+            phone.style.left = (initLeft + c.clientX - startX) + 'px';
+            phone.style.top = (initTop + c.clientY - startY) + 'px';
+            phone.style.transform = 'none'; checkOverlap();
+        }
+        function endDrag() {
+            if(!verified) { isDragging = false; phone.style.transition = 'all 0.5s'; phone.style.left = '50%'; phone.style.top = '10px'; phone.style.transform = 'translateX(-50%)'; }
+        }
+        function checkOverlap() {
+            const p = phone.getBoundingClientRect(); const t = document.querySelector('.passport-obj').getBoundingClientRect();
+            const cx = p.left + p.width/2, cy = p.top + p.height/2;
+            if (cx > t.left && cx < t.right && cy > t.top && cy < t.bottom) verifyNFC();
+        }
+        function verifyNFC() {
+            if(verified) return; verified = true; isDragging = false;
+            scanLine.style.animation = 'scan 1s infinite linear'; scanLine.style.opacity = '1';
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const o = ctx.createOscillator(); const g = ctx.createGain();
+            o.frequency.setValueAtTime(800, ctx.currentTime);
+            o.frequency.exponentialRampToValueAtTime(400, ctx.currentTime+0.15);
+            g.gain.setValueAtTime(0.1, ctx.currentTime);
+            g.gain.linearRampToValueAtTime(0, ctx.currentTime+0.15);
+            o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime+0.2);
+            setTimeout(() => {
+                scanLine.style.animation = 'none'; scanLine.style.opacity = '0';
+                // Fixed Verified Text Injection
+                document.querySelector('.phone-screen-simple').innerHTML = `
+                    <div style="font-size:2rem; margin-bottom:5px;">✅</div>
+                    <div class="verified-text">VERIFIED</div>
+                `;
+                document.getElementById('nfc-instructions').innerText = "VERIFIED";
+                document.getElementById('btn-verified').style.opacity = '1';
+                document.getElementById('btn-verified').style.pointerEvents = 'all';
+                document.getElementById('btn-verified').style.filter = 'none';
+            }, 1200);
+        }
+        const sheet = document.createElement("style"); sheet.innerText = `@keyframes scan { 0% {top:0} 50% {top:100%} 100% {top:0} }`; document.head.appendChild(sheet);
+
+        /* Game Logic */
+        const game = { level: 1, score: 0, selection: new Set(), puzzle: [] };
+        const levels = [
+            { title: "LEVEL 1", desc: "Select 3 Humans", count: 6, humans: 3 },
+            { title: "LEVEL 2", desc: "Select 4 Humans", count: 8, humans: 4 },
+            { title: "LEVEL 3", desc: "Select 5 Humans", count: 10, humans: 5 },
+            { title: "LEVEL 4", desc: "Select 6 Humans", count: 12, humans: 6 },
+            { title: "LEVEL 5", desc: "Select 7 Humans", count: 15, humans: 7 }
+        ];
+        function startGame() {
+            document.getElementById('game-intro').style.display = 'none';
+            document.getElementById('game-container').style.display = 'block';
+            renderLevel();
+        }
+        function renderLevel() {
+            if(game.level > levels.length) {
+                document.getElementById('game-container').style.display = 'none';
+                document.getElementById('win-page').style.display = 'block';
+                return;
+            }
+            const cfg = levels[game.level-1];
+            document.getElementById('g-title').innerText = cfg.title;
+            document.getElementById('g-desc').innerText = cfg.desc;
+            document.getElementById('g-level').innerText = game.level;
+            game.selection.clear(); game.puzzle = [];
+            for(let i=0; i<cfg.humans; i++) game.puzzle.push({type:'human', icon:'🧑'});
+            for(let i=0; i<cfg.count-cfg.humans; i++) game.puzzle.push({type:'ai', icon:'🤖'});
+            game.puzzle.sort(()=>Math.random()-0.5);
+            const grid = document.getElementById('g-grid'); grid.innerHTML = '';
+            game.puzzle.forEach((a, i) => {
+                const el = document.createElement('div');
+                el.style.cssText = "background:rgba(255,255,255,0.05); border:1px solid #333; border-radius:8px; padding:15px; cursor:pointer; font-size:2rem; text-align:center;";
+                el.innerText = a.icon;
+                el.onclick = () => {
+                    if(el.style.borderColor === 'rgb(0, 255, 136)') return;
+                    if(game.selection.has(i)) { game.selection.delete(i); el.style.background = "rgba(255,255,255,0.05)"; }
+                    else { game.selection.add(i); el.style.background = "rgba(0,229,255,0.2)"; }
+                };
+                grid.appendChild(el);
+            });
+        }
+        document.getElementById('g-verify-btn').onclick = () => {
+            const cfg = levels[game.level-1]; const children = document.getElementById('g-grid').children; let hits = 0, fail = false;
+            game.selection.forEach(i => { if(game.puzzle[i].type === 'human') hits++; else fail = true; });
+            if(!fail && hits === cfg.humans) {
+                game.score += 100 * game.level; document.getElementById('g-score').innerText = game.score;
+                document.getElementById('g-msg').innerText = "SUCCESS"; document.getElementById('g-msg').style.color = "#00ff88";
+                game.selection.forEach(i => children[i].style.borderColor = "#00ff88");
+                setTimeout(() => { game.level++; renderLevel(); }, 1000);
+            } else {
+                document.getElementById('g-msg').innerText = "FAILED - RETRY"; document.getElementById('g-msg').style.color = "#ff3366";
+                game.selection.forEach(i => children[i].style.borderColor = "#ff3366");
+                setTimeout(renderLevel, 1000);
+            }
+        }
+    </script>
+</body>
+</html>
