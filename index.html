@@ -104,24 +104,61 @@
             animation: pulseLogo 4s infinite ease-in-out; object-fit: cover;
         }
 
+                /* --- SUPER BRIGHT BREATHING BUTTON --- */
         .btn-cyber {
-            position: relative; background: transparent; color: var(--c-cyan);
-            border: 1px solid rgba(0, 229, 255, 0.4); padding: 18px 50px;
-            font-family: 'Orbitron', sans-serif; font-size: 0.9rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 2px; cursor: pointer;
-            overflow: hidden; transition: all 0.3s;
+            position: relative;
+            /* Default State (In/Dim) */
+            background: rgba(41, 98, 255, 0.6); 
+            color: #FFFFFF;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 25px 60px; /* Bigger touch area */
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            cursor: pointer;
+            margin-top: 40px;
+            z-index: 100;
             clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
-        }
-        .btn-cyber:hover {
-            background: rgba(0, 229, 255, 0.1); box-shadow: 0 0 30px rgba(0, 229, 255, 0.25);
-            transform: translateY(-2px); border-color: var(--c-cyan);
-        }
-        .btn-attention { animation: btnGlowPulse 2s infinite ease-in-out; }
-        @keyframes btnGlowPulse {
-            0%, 100% { box-shadow: 0 0 10px rgba(0, 229, 255, 0.2); border-color: rgba(0, 229, 255, 0.3); }
-            50% { box-shadow: 0 0 40px rgba(0, 229, 255, 0.8); border-color: rgba(0, 229, 255, 1); background: rgba(0, 229, 255, 0.1); }
+            
+            /* The Breathing Animation */
+            animation: superGlow 2s infinite ease-in-out;
+            transition: all 0.2s;
         }
 
+        /* Stop breathing and go solid bright when touched */
+        .btn-cyber:active, .btn-cyber:hover {
+            animation: none;
+            transform: scale(1.05);
+            background: #00E5FF; /* Solid Cyan */
+            color: #000;
+            box-shadow: 0 0 60px #00E5FF, 0 0 20px #FFFFFF;
+            border-color: #FFFFFF;
+        }
+
+        /* Make the first button use the same animation */
+        .btn-attention { animation: superGlow 2s infinite ease-in-out; }
+
+        @keyframes superGlow {
+            0%, 100% {
+                /* BREATH IN (Dim) */
+                transform: scale(1);
+                background: rgba(41, 98, 255, 0.5);
+                box-shadow: 0 0 10px rgba(41, 98, 255, 0.2);
+                border-color: rgba(255, 255, 255, 0.2);
+                text-shadow: none;
+            }
+            50% {
+                /* BREATH OUT (Very Bright) */
+                transform: scale(1.1); /* Gets bigger */
+                background: rgba(41, 98, 255, 1); /* Solid Blue */
+                box-shadow: 0 0 50px #00E5FF, 0 0 15px #FFFFFF; /* Huge Cyan Glow + White Core */
+                border-color: #00E5FF;
+                text-shadow: 0 0 10px #FFFFFF; /* Text glows white */
+            }
+        }
+        
         .social-bar { display: flex; gap: 30px; margin-top: 50px; justify-content: center; width: 100%; }
         .social-link {
             color: var(--c-text-muted); text-decoration: none; font-size: 1.1rem;
